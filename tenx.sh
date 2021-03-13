@@ -20,6 +20,9 @@ echo -e "$red ╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═
 mkdir 10x && cd 10x
 
 # Sync TenX Sources
+echo -e "$red*************************************************"
+echo -e "            Initializing TenX repos                  "
+echo -e "***********************************************$nocol"
 repo init -u git://github.com/TenX-OS/manifest_TenX -b eleven
 echo -e "$red*************************************************"
 echo -e "            Initialized TenX Repos                   "
@@ -73,7 +76,21 @@ function print_exit_status() {
      echo -e "$cyan************************************************"
      echo -e "                 Invalid Choices                     "
      echo -e "***********************************************$nocol"
-     exit 0
+     exit
+}
+
+function set_device() {
+case $device in
+  1)
+  build_10x_for_xt
+  ;;
+  2)
+  build_10x_for_asus
+  ;;
+  *)
+  print_exit_status
+  ;;
+esac
 }
 
 # Options
@@ -95,20 +112,22 @@ case $ch in
      clone_asus ;;
 esac
 
-if [[ "ch" = "1" ]]; then
-    clone_xt
-elif [[ "ch" = "2" ]]; then
-    clone_asus
-else
-      if [[ $ch -gt 2 ]]; then
-         print_exit_status
-      fi
-fi
+case $ch in
+  1)
+  clone_xt
+  ;;
+  2)
+  clone_asus
+  ;;
+  *)
+  print_exit_status
+  ;;
+esac
 }
 
 # Build options
 function build_options() {
-  echo -e " Dou you want to start your Build "
+  echo -e " Do you want to start your Build "
   echo -e " 1.Yes"
   echo -e " 2.No"
   echo -n " Your choice : ? "
@@ -118,11 +137,16 @@ case $build in
   1) echo -e "$cyan************************************************"
      echo -e "                         Yes                         "
      echo -e "***********************************************$nocol"
-     choose_device ;;
+     choose_device
+     ;;
   2) echo -e "$cyan************************************************"
      echo -e "                         No                         "
      echo -e "***********************************************$nocol"
-     exit 0 ;;
+     exit
+     ;;
+  *)
+     print_exit_status
+     ;;
 esac
 
 # Choose device
@@ -144,22 +168,21 @@ case $device in
      build_10x_for_asus ;;
 esac
 
-if [[ "build" = "1" ]]; then
-   if [[ "device" = "1" ]]; then
-      build_10x_for_xt
-   elif [[ "device" = "2" ]]; then
-      build_10x_for_asus
-   elif [[ $device -ge 2 ]]; then
-       print_exit_status
-   else
-      exit 0
-    fi
-else
-     print_exit_status
-fi
+case $build in
+  1)
+  set_device
+  ;;
+  2)
+  exit
+  ;;
+  *)
+  exit
+  ;;
+esac
  }
 }
 
 options
 build_options
 choose_device
+set_device
