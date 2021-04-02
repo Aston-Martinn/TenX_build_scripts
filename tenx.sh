@@ -39,10 +39,9 @@ echo -e "**************************************************$nocol"
 
 # Clone the device trees
 function clone_xt() {
-git clone https://github.com/KharaMe-devs/android_device_realme_RMX1921.git -b eleven device/realme/RMX1921
-git clone https://github.com/KharaMe-devs/android_device_realme_sdm710-common.git -b xt device/realme/sdm710-common
-git clone https://github.com/KharaMe-devs/proprietary_vendor_realme.git -b eleven vendor/realme
-git clone https://github.com/KharaMe-devs/android_kernel_realme_sdm710.git -b XT kernel/realme/sdm710
+git clone https://github.com/Ten-X-Devices/device_realme_RMX1921.git -b eleven device/realme/RMX1921
+git clone https://github.com/Ten-X-Devices/vendor_realme_RMX1921.git -b eleven vendor/realme/RMX1921
+git clone https://github.com/Ten-X-Devices/kernel_realme_sdm710.git -b XT kernel/realme/sdm710
 }
 
 function clone_asus() {
@@ -54,7 +53,7 @@ git clone https://github.com/ArrowOS-Devices/android_kernel_asus_X00T.git -b arr
 # Build commands
 function build_10x_for_xt() {
 . b*/e*
-lumch aosp_RMX1921-userdebug
+lunch aosp_RMX1921-userdebug
 export CUSTOM_BUILD_TYPE=Official
 source ~/.bashrc
 export USE_CCACHE=1
@@ -64,7 +63,7 @@ brunch RMX1921 | tee build.log
 
 function build_10x_for_asus() {
 . b*/e*
-lumch aosp_X00T-userdebug
+lunch aosp_X00T-userdebug
 export CUSTOM_BUILD_TYPE=Official
 source ~/.bashrc
 export USE_CCACHE=1
