@@ -20,33 +20,34 @@ echo -e "$red ╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═
 
 # Directory name
 function dir_name() {
-    echo -e "Enter the name of the ROM directory :"
+    echo -e "$green Enter the name of the ROM directory : $nocol"
     read dir
 }
 
 # Device name
 function device_name() {
-    echo -e "Enter your Device name :"
+    echo -e "$blue Enter your Device name : $nocol"
     read device
 }
 
 # Device codename
 function device_codename() {
-    echo -e "Enter your Device Codename :"
+    echo -e "$red Enter your Device Codename : $nocol"
     read codename
 }
 
 # Create directory
 function create_dir() {
+    echo -e "$yellow Directory has be created Succussfully. $nocol"
     mkdir $dir
     cd $dir
 }
 
 function what_to_do() {
-   echo -e "What you would like to do?"
-   echo -e "1. Sync, Build & Upload."
-   echo -e "2. Build & upload only."
-   echo -e "3. Upload only."
+   echo -e "$red What you would like to do? $nocol"
+   echo -e "$yellow 1. Sync, Build & Upload. $nocol"
+   echo -e "$yellow 2. Build & upload only. $nocol"
+   echo -e "$yellow 3. Upload only. $nocol"
    read to_do
 
    case $to_do in
@@ -60,6 +61,13 @@ function what_to_do() {
      upload
      ;;
      2)
+     echo -e "$green Checking for $dir Directory...$nocol"
+     if [[ -d $dir ]]; then
+        echo -e "$red $dir Exists, Continuing!$nocol"
+     else
+        echo -e "$green $dir Doesn't Exists, Exiting!$nocol"
+        exit
+     fi
      cd $dir
      build_make
      build_tenx
@@ -95,15 +103,15 @@ function clone_dt() {
     echo -e "$cyan*************************************************"
     echo -e "                Cloning Device Tree                   " 
     echo -e "************************************************$nocol"
-    echo -e "Enter the device tree link :"
+    echo -e "$green Enter the device tree link : $nocol"
     read dt_link
-    echo -e "Enter the branch name: "
+    echo -e "$yellow Enter the branch name : $nocol"
     read dt_branch
     git clone --quiet $dt_link -b $dt_branch device/$device/$codename > /dev/null
 
-    echo -e "Do you want to modify your device trees as per TenX base ?"
-    echo -e "1. Yes"
-    echo -e "2. No"
+    echo -e "$blue Do you want to modify your device trees as per TenX base ?$nocol"
+    echo -e "$green 1. Yes $nocol"
+    echo -e "$red 2. No $nocol"
     read modify
 
     case $modify in
@@ -111,7 +119,7 @@ function clone_dt() {
       modify_tree
       ;;
       2)
-      echo -e "Continuing cloning trees"
+      echo -e "$yellow Continuing cloning trees... $nocol"
       ;;
     esac
 }
@@ -122,49 +130,50 @@ function modify_tree() {
     mv *_$codename.mk aosp_$codename.mk
     mv *.dependencies aosp.dependencies
 
-    echo -e "What to replace with aosp?"
+    echo -e "$cyan What to replace with aosp? $nocol"
     read what_to
 
     sed -i "s|$what_to|aosp|g" aosp_$codename.mk
     sed -i "s|$what_to|aosp|g" AndroidProducts.mk
 
-    echo -e "Checking for Gapps flags"
+    echo -e "$green Checking for Gapps flags $nocol"
     if grep -Fxq "TARGET_GAPPS_ARCH := arm64" aosp_X00T.mk
     then
-       echo -e "Gapps flag exists, Continuing"
+       echo -e "$cyan Gapps flag exists, Continuing $nocol"
     else
-       echo -e "Gapps flag doesn't exixts, Adding"
+       echo -e "$green Gapps flag doesn't exixts, Adding... $nocol"
        echo "" >> aosp_$codename.mk
        echo "# Ten-X Extras" >> aosp_$codename.mk
        echo "TARGET_GAPPS_ARCH := arm64" >> aosp_$codename.mk
+       echo -e "$green You're good to go... $nocol"
     fi
 
-    echo -e "Checking for Bootanimation res flag"
+    echo -e "$red Checking for Bootanimation res flag $nocol"
     if grep -Fxq "TARGET_BOOT_ANIMATION_RES := 1080" aosp_X00T.mk
     then
-       echo -e "Bootanimation flag exists, Continuing"
+       echo -e "$green Bootanimation flag exists, Continuing $nocol"
     else
-       echo -e "Bootanimation flag doesn't exists, Adding"
-       echo -e "Enter the Bootanimation res"
+       echo -e "$green Bootanimation flag doesn't exists, Adding $nocol"
+       echo -e "$yellow Enter the Bootanimation res $nocol"
        read res
        echo "TARGET_BOOT_ANIMATION_RES := $res" >> aosp_$codename.mk
     fi
 
     git add .
     git commit --quiet -m "$codename: Init TenX-OS" --signoff > /dev/null
-    echo -e "Do you want to push your Device tree?"
-    echo -e "1. Yes"
-    echo -e "2. No"
+    echo -e "$cyan Do you want to push your Device tree? $nocol"
+    echo -e "$yellow 1. Yes $nocol"
+    echo -e "$yellow 2. No $nocol"
     read push
 
     case $push in
      1)
-     echo -e "Enter the link of the repo to push"
+     echo -e "$blue Enter the link of the repo to push $nocol"
      read repo
-     git push -u $repo HEAD:eleven
+     git push --quiet -u $repo HEAD:eleven > /dev/null
      ;;
      2)
-     echo -e "Fine, you can puish it later, Continuing!"
+     echo -e "$red Fine, you can push it later, Continuing! $nocol"
      ;;
    esac
 }
@@ -174,12 +183,12 @@ function clone_kt() {
     echo -e "$yellow*************************************************"
     echo -e "                  Cloning Kernel Tree                   "
     echo -e "**************************************************$nocol"
-    echo -e "Enter the kernel tree link :"
+    echo -e "$blue Enter the kernel tree link :$nocol"
     read kt_link
-    echo -e "Enter the device platform or the kernel target name : "
-    echo -e "Example - sdm710 or sdm660"
+    echo -e "$blue Enter the device platform or the kernel target name : $nocol"
+    echo -e "$cyan Example - sdm710 or sdm660 $nocol"
     read target
-    echo -e "Enter the branch name: "
+    echo -e "$cyan Enter the branch name: $nocol"
     read kt_branch
     git clone --quiet $kt_link -b $kt_branch kernel/$device/$target > /dev/null
 }
@@ -189,15 +198,15 @@ function clone_vt() {
     echo -e "$green*************************************************"
     echo -e "                 Cloning Vendor Tree                   "
     echo -e "*************************************************$nocol"
-    echo -e "Enter the vendor tree link : "
+    echo -e "$cyan Enter the vendor tree link : $nocol"
     read vt_link
-    echo -e "Enter the branch name: "
+    echo -e "$blue Enter the branch name: $nocol"
     read vt_branch
 
     # Some device's vendor trees has the files inside their codename, so
-    echo -e "What is the format to clone your vendor tree ?"
-    echo -e "1. vendor/device"
-    echo -e "2. vendor/device/codename"
+    echo -e "$red What is the format to clone your vendor tree ?$nocol"
+    echo -e "$yellow 1. vendor/device $yellow"
+    echo -e "$yellow 2. vendor/device/codename $yellow"
     read ch
 
     case $ch in
@@ -208,7 +217,7 @@ function clone_vt() {
       git clone --quiet $vt_link -b $vt_branch vendor/$device/$codename > /dev/null
       ;;
       *)
-      echo -e "Invalid option, Exiting!"
+      echo -e "$red Invalid option, Exiting!$nocol"
       exit
       ;;
     esac
@@ -216,9 +225,9 @@ function clone_vt() {
 
 # Clean build or dirty build
 function build_make() {
-   echo -e "Do you want to clean build ?"
-   echo -e "1. Yes"
-   echo -e "2. No"
+   echo -e "$green Do you want to clean build ?$nocol"
+   echo -e "$red 1. Yes $nocol"
+   echo -e "$red 2. No $nocol"
    read  make_build
 
    case $make_build in
@@ -231,7 +240,7 @@ function build_make() {
      $build_tenx
      ;;
      *)
-     echo -e "Invalid option, Exiting!"
+     echo -e "$red Invalid option, Exiting! $nocol"
      exit
      ;;
    esac
@@ -239,10 +248,10 @@ function build_make() {
 
 # Build type
 function build_type() {
-    echo -e "Choose the build type :"
-    echo -e "1. Unofficial"
-    echo -e "2. Official"
-    echo -e "3. Developer"
+    echo -e "$green Choose the build type :$nocol"
+    echo -e "$red 1. Unofficial $nocol"
+    echo -e "$blue 2. Official $nocol"
+    echo -e "$yellow 3. Developer $nocol"
     read build_type
 
     case $build_type in
@@ -256,7 +265,7 @@ function build_type() {
       export CUSTOM_BUILD_TYPE=Developer
       ;;
       *)
-      echo -e "Invalid option, Exiting!"
+      echo -e "$yellow Invalid option, Exiting! $nocol"
       exit
       ;;
     esac
@@ -277,19 +286,20 @@ function build_tenx() {
 
      local ret=$?
      if [[ $ret -eq 0 ]]; then
-        upload
+        then
+           upload
      else
-        echo -e "Error occured"
-        exit
+         echo -e "$red Error occured $nocol"
+         exit
      fi
 }
 
 # Upload
 function upload() {
     # Check for TenX-OS zip file
-    echo -e "Do you want to upload your build?"
-    echo -e "1. Yes"
-    echo -e "2. No"
+    echo -e "$blue Do you want to upload your build? $nocol"
+    echo -e "$red 1. Yes $nocol"
+    echo -e "$green 2. No $nocol"
     read upload
 
     case $upload in
@@ -300,16 +310,15 @@ function upload() {
       exit
       ;;
       *)
-      echo -e "Invalid option, Exiting!"
+      echo -e "$cyan Invalid option, Exiting! $nocol"
       exit
       ;;
     esac
 
-    echo -e "Please choose where to upload your build: "
-    echo -e "1. Gdrive"
-    echo -e "2. Mega"
-    echo -e "2. Sourceforge"
-    echo -e "Option 3 is only for Official builds"
+    echo -e "$green Please choose where to upload your build: $nocol"
+    echo -e "$yellow 1. Gdrive $nocol"
+    echo -e "$red 2. Mega $nocol"
+    echo -e "$green 3. Sourceforge $nocol"
     read upload_to
 
     case $upload_to in
@@ -317,11 +326,11 @@ function upload() {
       echo -e "$blue**************************************************"
       echo -e "                    Uploading to Gdrive                "
       echo -e "*************************************************$nocol"
-      echo -e "Ckecking for gdrive upload"
+      echo -e "$cyan Checking for gdrive upload $nocol"
       if [[ -f /usr/local/bin/gdrive ]]; then
-         echo -e "Gdrive File exists, Uploading"
+         echo -e "$green Gdrive File exists, Uploading $nocol"
       else
-         echo -e "Gdrive file doesn't exists, Please install Gdrive. Exiting."
+         echo -e "$red Gdrive file doesn't exists, Please install Gdrive. Exiting. $nocol"
          exit
       fi
       cd out/target/product/$codename
@@ -332,25 +341,32 @@ function upload() {
       echo -e "$blue**************************************************"
       echo -e "                    Uploading to Mega                  "
       echo -e "*************************************************$nocol"
-      echo -e "Checking for mega upload"
+      echo -e "$blue Checking for mega upload $nocol"
       if [[ -f /usr/local/bin/rmega-up ]]; then
-         echo -e "Mega File Exists, uploading"
+         echo -e "$yellow Mega File Exists, uploading $nocol"
       else
-        echo -e "Mega file doesn't exists, please install mega. Exiting."
+        echo -e "$red Mega file doesn't exists, please install mega. Exiting. $nocol"
         exit
       fi
       cd out/target/product/$codename
-      echo -e "Enter your mega Email id :"
+      echo -e "$green Enter your mega Email id : $nocol"
       read email
       rmega-up TenX-OS*.zip -u $email
       exit
       ;;
       3)
+      echo -e "$green Checking whether the build is Official or not $nocol"
+      if [[ $build_type -eq 2 ]]; then
+          echo -e "$green Official build found. $nocol"
+      else
+          echo -e "$red Your build is not Official, Exiting! $nocol"
+          exit
+      fi
       echo -e "$blue**************************************************"
       echo -e "                    Uploading to Sourceforge           "
       echo -e "*************************************************$nocol"
       cd out/target/product/$codename
-      echo -e "Enter your sourceforge username :"
+      echo -e "$yellow Enter your sourceforge username : $nocol"
       read user_name
       sftp $user_name@frs.sourceforge.net
       cd /home/frs/projects/tenxos/$codename
@@ -358,7 +374,7 @@ function upload() {
       exit
       ;;
       *)
-      echo -e "Invalid option, Exiting!"
+      echo -e "$red Invalid option, Exiting! $nocol"
       exit
       ;;
     esac
