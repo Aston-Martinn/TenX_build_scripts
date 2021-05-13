@@ -286,7 +286,6 @@ function build_tenx() {
 
      local ret=$?
      if [[ $ret -eq 0 ]]; then
-        then
            upload
      else
          echo -e "$red Error occured $nocol"
