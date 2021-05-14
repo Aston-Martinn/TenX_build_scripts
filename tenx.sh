@@ -26,7 +26,7 @@ function dir_name() {
 
 # Device name
 function device_name() {
-    echo -e "$blue Enter your Device name : $nocol"
+    echo -e "$blue Enter your Device name (Small letters only) : $nocol"
     read device
 }
 
@@ -48,6 +48,7 @@ function what_to_do() {
    echo -e "$yellow 1. Sync, Build & Upload. $nocol"
    echo -e "$yellow 2. Build & upload only. $nocol"
    echo -e "$yellow 3. Upload only. $nocol"
+   echo -e "$green Enter your choice $nocol"
    read to_do
 
    case $to_do in
@@ -112,6 +113,7 @@ function clone_dt() {
     echo -e "$blue Do you want to modify your device trees as per TenX base ?$nocol"
     echo -e "$green 1. Yes $nocol"
     echo -e "$red 2. No $nocol"
+    echo -e "$yellow Enter your choice $nocol"
     read modify
 
     case $modify in
@@ -164,6 +166,7 @@ function modify_tree() {
     echo -e "$cyan Do you want to push your Device tree? $nocol"
     echo -e "$yellow 1. Yes $nocol"
     echo -e "$yellow 2. No $nocol"
+    echo -e "$green Enter your choice $nocol"
     read push
 
     case $push in
@@ -228,6 +231,7 @@ function build_make() {
    echo -e "$green Do you want to clean build ?$nocol"
    echo -e "$red 1. Yes $nocol"
    echo -e "$red 2. No $nocol"
+   echo -e "$green Enter your choice $nocol"
    read  make_build
 
    case $make_build in
@@ -283,14 +287,6 @@ function build_tenx() {
      export USE_CCACHE=1
      ccache -M 30G
      brunch $codename | tee build.log
-
-     local ret=$?
-     if [[ $ret -eq 0 ]]; then
-           upload
-     else
-         echo -e "$red Error occured $nocol"
-         exit
-     fi
 }
 
 # Upload
@@ -299,6 +295,7 @@ function upload() {
     echo -e "$blue Do you want to upload your build? $nocol"
     echo -e "$red 1. Yes $nocol"
     echo -e "$green 2. No $nocol"
+    echo -e "$cyan Enter your choice $nocol"
     read upload
 
     case $upload in
@@ -318,6 +315,7 @@ function upload() {
     echo -e "$yellow 1. Gdrive $nocol"
     echo -e "$red 2. Mega $nocol"
     echo -e "$green 3. Sourceforge $nocol"
+    echo -e "$cyan Enter your choice $nocol"
     read upload_to
 
     case $upload_to in
