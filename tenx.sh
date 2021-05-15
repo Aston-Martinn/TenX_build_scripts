@@ -43,6 +43,13 @@ function create_dir() {
     cd $dir
 }
 
+# Clone Realme XT's Trees if codename is RMX1921
+function clone_xt() {
+    git clone --quiet https://github.com/Ten-X-Devices/device_realme_RMX1921.git -b eleven device/realme/RMX1921 > /dev/null
+    git clone --quiet https://github.com/Ten-X-Devices/kernel_realme_sdm710.git -b eleven kernel/realme/sdm710 > /dev/null
+    git clone --quiet https://github.com/Ten-X-Devices/vendor_realme_RMX1921.git -b eleven vendor/realme/RMX1921 > /dev/null
+}
+
 function what_to_do() {
    echo -e "$red What you would like to do? $nocol"
    echo -e "$yellow 1. Sync, Build & Upload. $nocol"
@@ -54,7 +61,17 @@ function what_to_do() {
    case $to_do in
      1)
      create_dir
-     sync_tenx
+     # sync_tenx
+     echo -e ""
+     echo -e "$blue Checking for Realme XT (RMX1921) $nocol"
+     if [ $codename == RMX1921 ]; then
+         echo -e "$green Device detected as Realme XT (RMX1921), Cloning Device Trees! $nocol"
+         clone_xt
+     else
+         echo -e ""
+         echo -e "$red Entered codename is not Realme XT, It is $codename, Continuing! $nocol"
+     fi
+     echo -e ""
      clone_dt
      clone_kt
      clone_vt
