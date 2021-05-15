@@ -22,18 +22,24 @@ echo -e "$red ╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═
 function dir_name() {
     echo -e "$green Enter the name of the ROM directory : $nocol"
     read dir
+    echo -e "$green Entered Directory name is $dir $nocol"
+    echo -e ""
 }
 
 # Device name
 function device_name() {
     echo -e "$blue Enter your Device name (Small letters only) : $nocol"
     read device
+    echo -e "$green Entered Device name is $device $nocol"
+    echo -e ""
 }
 
 # Device codename
 function device_codename() {
     echo -e "$red Enter your Device Codename : $nocol"
     read codename
+    echo -e "$green Entered Device codename is $codename $nocol"
+    echo -e ""
 }
 
 # Create directory
@@ -55,13 +61,14 @@ function what_to_do() {
    echo -e "$yellow 1. Sync, Build & Upload. $nocol"
    echo -e "$yellow 2. Build & upload only. $nocol"
    echo -e "$yellow 3. Upload only. $nocol"
-   echo -e "$green Enter your choice $nocol"
+   echo -e "$green Enter your choice: $nocol"
    read to_do
+   echo -e "$red Your choice was $to_do $nocol"
 
    case $to_do in
      1)
      create_dir
-     # sync_tenx
+     sync_tenx
      echo -e ""
      echo -e "$blue Checking for Realme XT (RMX1921) $nocol"
      if [ $codename == RMX1921 ]; then
@@ -132,6 +139,7 @@ function clone_dt() {
     echo -e "$red 2. No $nocol"
     echo -e "$yellow Enter your choice $nocol"
     read modify
+    echo -e "$blue Your choice was $modify $nocol"
 
     case $modify in
       1)
@@ -185,6 +193,7 @@ function modify_tree() {
     echo -e "$yellow 2. No $nocol"
     echo -e "$green Enter your choice $nocol"
     read push
+    echo -e "$yellow Your choice was $push $nocol"
 
     case $push in
      1)
@@ -227,7 +236,10 @@ function clone_vt() {
     echo -e "$red What is the format to clone your vendor tree ?$nocol"
     echo -e "$yellow 1. vendor/device $yellow"
     echo -e "$yellow 2. vendor/device/codename $yellow"
+    echo -e "$green Enter your choice: $nocol"
     read ch
+    echo -e "$blue Your choice was $ch $nocol"
+
 
     case $ch in
       1)
@@ -250,6 +262,7 @@ function build_make() {
    echo -e "$red 2. No $nocol"
    echo -e "$green Enter your choice $nocol"
    read  make_build
+   echo -e "$blue Your choice was $ch $nocol"
 
    case $make_build in
      1)
@@ -273,7 +286,9 @@ function build_type() {
     echo -e "$red 1. Unofficial $nocol"
     echo -e "$blue 2. Official $nocol"
     echo -e "$yellow 3. Developer $nocol"
+    echo -e "$green Enter your choice $nocol"
     read build_type
+    echo -e "$blue Your choice was $ch $nocol"
 
     case $build_type in
       1)
@@ -314,6 +329,7 @@ function upload() {
     echo -e "$green 2. No $nocol"
     echo -e "$cyan Enter your choice $nocol"
     read upload
+    echo -e "$blue Your choice was $upload $nocol"
 
     case $upload in
       1)
