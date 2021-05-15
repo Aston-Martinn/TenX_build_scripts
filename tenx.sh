@@ -164,7 +164,7 @@ function modify_tree() {
     sed -i "s|$what_to|aosp|g" AndroidProducts.mk
 
     echo -e "$green Checking for Gapps flags $nocol"
-    if grep -Fxq "TARGET_GAPPS_ARCH := arm64" aosp_X00T.mk
+    if grep -Fxq "TARGET_GAPPS_ARCH := arm64" aosp_$codename.mk
     then
        echo -e "$cyan Gapps flag exists, Continuing $nocol"
     else
