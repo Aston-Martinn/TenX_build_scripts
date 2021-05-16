@@ -63,12 +63,14 @@ function what_to_do() {
    echo -e "$yellow 3. Upload only. $nocol"
    echo -e "$green Enter your choice: $nocol"
    read to_do
-   echo -e "$red Your choice was $to_do $nocol"
+   echo -e "$red Your choice was $what_to_do $nocol"
 
    case $to_do in
      1)
      create_dir
      sync_tenx
+     echo -e "$blue Good night, for a power nap $nocol"
+     sleep 3
      echo -e ""
      echo -e "$blue Checking for Realme XT (RMX1921) $nocol"
      if [ $codename == RMX1921 ]; then
@@ -79,10 +81,16 @@ function what_to_do() {
          echo -e "$red Entered codename is not Realme XT, It is $codename, Continuing! $nocol"
      fi
      echo -e ""
-     clone_dt
-     clone_kt
-     clone_vt
-     build_tenx
+     if [ $codename == RMX1921 ]; then
+        build_tenx
+     else
+        clone_dt
+        clone_kt
+        clone_vt
+        echo -e "$blue Good night, for a power nap $nocol"
+        sleep 3
+        build_tenx
+     fi
      upload
      ;;
      2)
@@ -95,6 +103,8 @@ function what_to_do() {
      fi
      cd $dir
      build_make
+     echo -e "$blue Good night, for a power nap $nocol"
+     sleep 3
      build_tenx
      upload
      ;;
@@ -126,7 +136,7 @@ function sync_tenx() {
 # Clone device trees
 function clone_dt() {
     echo -e "$cyan*************************************************"
-    echo -e "                Cloning Device Tree                   " 
+    echo -e "                Cloning Device Tree                   "
     echo -e "************************************************$nocol"
     echo -e "$green Enter the device tree link : $nocol"
     read dt_link
@@ -196,15 +206,15 @@ function modify_tree() {
     echo -e "$yellow Your choice was $push $nocol"
 
     case $push in
-     1)
-     echo -e "$blue Enter the link of the repo to push $nocol"
-     read repo
-     git push --quiet -u $repo HEAD:eleven > /dev/null
-     ;;
-     2)
-     echo -e "$red Fine, you can push it later, Continuing! $nocol"
-     ;;
-   esac
+      1)
+      echo -e "$blue Enter the link of the repo to push $nocol"
+      read repo
+      git push --quiet -u $repo HEAD:eleven > /dev/null
+      ;;
+      2)
+      echo -e "$red Fine, you can push it later, Continuing! $nocol"
+      ;;
+    esac
 }
 
 # Clone kernel tree
@@ -240,7 +250,6 @@ function clone_vt() {
     read ch
     echo -e "$blue Your choice was $ch $nocol"
 
-
     case $ch in
       1)
       git clone --quiet $vt_link -b $vt_branch vendor/$device > /dev/null
@@ -260,13 +269,14 @@ function build_make() {
    echo -e "$green Do you want to clean build ?$nocol"
    echo -e "$red 1. Yes $nocol"
    echo -e "$red 2. No $nocol"
-   echo -e "$green Enter your choice $nocol"
+   echo -e "$green Enter your choice: $nocol"
    read  make_build
    echo -e "$blue Your choice was $ch $nocol"
 
    case $make_build in
      1)
      . b*/e*
+     make installclean
      make clean
      make clobber
      ;;
@@ -286,7 +296,7 @@ function build_type() {
     echo -e "$red 1. Unofficial $nocol"
     echo -e "$blue 2. Official $nocol"
     echo -e "$yellow 3. Developer $nocol"
-    echo -e "$green Enter your choice $nocol"
+    echo -e "$green Enter your choice: $nocol"
     read build_type
     echo -e "$blue Your choice was $ch $nocol"
 
@@ -312,13 +322,19 @@ function build_tenx() {
      echo -e "$blue**************************************************"
      echo -e "                    Building TenX-OS                   "
      echo -e "*************************************************$nocol"
-     . build/envsetup.sh
+     . build/envsetup.sh && echo $?
      lunch aosp_$codename-userdebug
      build_type
      source ~/.bashrc
      export USE_CCACHE=1
      ccache -M 30G
-     brunch $codename | tee build.log
+     brunch $codename && echo $?
+     local ret=$?
+     if [[ $ret -eq 0 ]]; then
+         upload
+     else
+        exit
+     fi
 }
 
 # Upload
@@ -327,7 +343,7 @@ function upload() {
     echo -e "$blue Do you want to upload your build? $nocol"
     echo -e "$red 1. Yes $nocol"
     echo -e "$green 2. No $nocol"
-    echo -e "$cyan Enter your choice $nocol"
+    echo -e "$cyan Enter your choice: $nocol"
     read upload
     echo -e "$blue Your choice was $upload $nocol"
 
@@ -348,8 +364,9 @@ function upload() {
     echo -e "$yellow 1. Gdrive $nocol"
     echo -e "$red 2. Mega $nocol"
     echo -e "$green 3. Sourceforge $nocol"
-    echo -e "$cyan Enter your choice $nocol"
+    echo -e "$cyan Enter your choice: $nocol"
     read upload_to
+    echo -e "$blue Your choice was $upload $nocol"
 
     case $upload_to in
       1)
