@@ -61,6 +61,7 @@ function what_to_do() {
    echo -e "$yellow 1. Sync, Build & Upload. $nocol"
    echo -e "$yellow 2. Build & upload only. $nocol"
    echo -e "$yellow 3. Upload only. $nocol"
+   echo -e "$yellow 4. Clone my Device Trees & Build. $nocol"
    echo -e "$green Enter your choice: $nocol"
    read to_do
    echo -e "$red Your choice was $what_to_do $nocol"
@@ -110,6 +111,15 @@ function what_to_do() {
      ;;
      3)
      cd $dir
+     upload
+     ;;
+     4)
+     clone_dt
+     clone_kt
+     clone_vt
+     echo -e "$blue Good night, for a power nap $nocol"
+     sleep 10
+     build_tenx
      upload
      ;;
    esac
