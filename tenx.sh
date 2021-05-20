@@ -18,6 +18,95 @@ echo -e "$red ╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═
 
 # Simple bash script to compile TenX-OS
 
+# Your choice
+function your_choice() {
+    echo -e "$green How would you like to start with? $nocol"
+    echo -e "$blue 1. Automated $nocol"
+    echo -e "$blue 2. Manual $nocol"
+    read my_ch
+
+    if [[ $my_ch -eq 1 ]]; then
+        echo -e "$red Warning! This condition is only for Realme XT. $nocol"
+        echo -e "$green Do you want to continue? $nocol"
+	select yn in "Yes" "No"; do
+        case $yn in
+	Yes)
+	  echo -e "$green Continuing. $nocol"
+          echo -e ""
+          continue_for
+	  ;;
+	No)
+	  echo -e "$red Exiting $nocol"
+          exit 1
+	  ;;
+        esac
+      done
+    fi
+}
+
+function continue_for() {
+    case $my_ch in
+      1)
+      echo -e "$cyan Checking for directory... $nocol"
+      echo -e ""
+      if [[ -d 10x ]]; then
+          echo -e "$cyan 10X directory exists, starting the build... $nocol"
+          cd 10x
+          build_tenx_for_XT
+          upload_to_gdrive
+      else
+          echo -e "$cyan Directory not found. $nocol"
+          echo -e ""
+      fi
+      echo -e "$cyan Creating & entering the Directory! $nocol"
+      mkdir 10x
+      cd 10x
+      echo -e "$green Succussfully completed the first Task, Goodluck ahead. $nocol"
+      sleep 10
+      echo -e "$cyan Initializing TenX-OS Repos. $nocol"
+      repo init -u git://github.com/TenX-OS/manifest_TenX -b eleven
+      echo -e "$cyan Syncing TenX-OS Repos. $nocol"
+      repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+      echo -e "$greeen Succussfully completed the second Task, Goodluck ahead. $nocol"
+      sleep 20
+      echo -e "$cyan Cloning Device Trees for Realme XT. $nocol"
+      clone_xt
+      sleep 10
+      build_tenx_for_XT
+      upload_to_gdrive
+      ;;
+      2)
+      echo -e "$blue Starting the Scripts. $nocol"
+      ;;
+    esac
+}
+
+# Build for XT
+function build_tenx_for_XT() {
+   . b*/e*
+   lunch aosp_RMX1921-userdebug
+   export CUSTOM_BUILD_TYPE=Official
+   source ~/.bashrc
+   export USE_CCACHE=1
+   ccache -M 30G
+   brunch RMX1921
+
+   local ret=$?
+   if [[ $ret -eq 0 ]]; then
+       upload
+   else
+       echo -e "$red I've found some errors, stopping the Script, Fix them & Re-run me !! $nocol"
+       exit
+     fi
+}
+
+# Upload to gdrive
+function upload_to_gdrive() {
+   cd out/target/product/RMX1921
+   echo -e "$green Uploading to Gdrive $nocol"
+   gdrive upload TenX*.zip
+}
+
 # Directory name
 function dir_name() {
     echo -e "$green Enter the name of the ROM directory : $nocol"
@@ -64,14 +153,14 @@ function what_to_do() {
    echo -e "$yellow 4. Clone my Device Trees & Build. $nocol"
    echo -e "$green Enter your choice: $nocol"
    read to_do
-   echo -e "$red Your choice was $what_to_do $nocol"
+   echo -e "$red Your choice was $to_do $nocol"
 
    case $to_do in
      1)
      create_dir
      sync_tenx
      echo -e "$blue Good night, for a power nap $nocol"
-     sleep 3
+     sleep 10
      echo -e ""
      echo -e "$blue Checking for Realme XT (RMX1921) $nocol"
      if [ $codename == RMX1921 ]; then
@@ -89,7 +178,7 @@ function what_to_do() {
         clone_kt
         clone_vt
         echo -e "$blue Good night, for a power nap $nocol"
-        sleep 3
+        sleep 10
         build_tenx
      fi
      upload
@@ -105,7 +194,7 @@ function what_to_do() {
      cd $dir
      build_make
      echo -e "$blue Good night, for a power nap $nocol"
-     sleep 3
+     sleep 10
      build_tenx
      upload
      ;;
@@ -152,8 +241,29 @@ function clone_dt() {
     read dt_link
     echo -e "$yellow Enter the branch name : $nocol"
     read dt_branch
-    git clone --quiet $dt_link -b $dt_branch device/$device/$codename > /dev/null
+    echo -e ""
+    echo -e "$green Device tree link was [git clone $dt_link -b $dt_branch device/$device/$codename] $nocol"
+    echo -e "$yellow was that correct? $nocol"
+    select yn in "Yes" "No"; do
+    case $yn in
+       Yes)
+          echo -e "$green Cloning your Device Tree. $nocol"
+          git clone --quiet $dt_link -b $dt_branch device/$device/$codename > /dev/null
+          modify_tree
+          break
+          ;;
+        No)
+          echo -e "$red Okk Fine $nocol"
+          clone_dt
+          modify_tree
+          break
+          ;;
+      esac
+    done
+}
 
+# Auto tree modification
+function modify_tree() {
     echo -e "$blue Do you want to modify your device trees as per TenX base ?$nocol"
     echo -e "$green 1. Yes $nocol"
     echo -e "$red 2. No $nocol"
@@ -163,16 +273,16 @@ function clone_dt() {
 
     case $modify in
       1)
-      modify_tree
+      modify_in
       ;;
       2)
       echo -e "$yellow Continuing cloning trees... $nocol"
+      clone_kt
       ;;
     esac
 }
 
-# Auto tree modification
-function modify_tree() {
+function modify_in() {
     cd device/$device/$codename
     mv *_$codename.mk aosp_$codename.mk
     mv *.dependencies aosp.dependencies
@@ -223,6 +333,7 @@ function modify_tree() {
       ;;
       2)
       echo -e "$red Fine, you can push it later, Continuing! $nocol"
+      clone_kt
       ;;
     esac
 }
@@ -239,7 +350,25 @@ function clone_kt() {
     read target
     echo -e "$cyan Enter the branch name: $nocol"
     read kt_branch
-    git clone --quiet $kt_link -b $kt_branch kernel/$device/$target > /dev/null
+    echo -e ""
+    echo -e "$green Kernel Tree link was [git clone $kt_link -b $kt_branch kernel/$device/$target] $nocol"
+    echo -e "$yellow was that correct? $nocol"
+    select yn1 in "Yes" "No"; do
+    case $yn1 in
+       Yes)
+          echo -e "$green Cloning your Kernel Tree. $nocol"
+          git clone --quiet $kt_link -b $kt_branch kernel/$device/$target > /dev/null
+          clone_vt
+          break
+          ;;
+        No)
+          echo -e "$red Okay Fine $nocol"
+          clone_kt
+          clone_vt
+          break
+          ;;
+      esac
+    done
 }
 
 # Clone vendor tree
@@ -251,7 +380,6 @@ function clone_vt() {
     read vt_link
     echo -e "$blue Enter the branch name: $nocol"
     read vt_branch
-
     # Some device's vendor trees has the files inside their codename, so
     echo -e "$red What is the format to clone your vendor tree ?$nocol"
     echo -e "$yellow 1. vendor/device $yellow"
@@ -262,10 +390,44 @@ function clone_vt() {
 
     case $ch in
       1)
-      git clone --quiet $vt_link -b $vt_branch vendor/$device > /dev/null
+      echo -e "Entered Vendor Tree link was [git clone $vt_link -b $vt_branch vendor/$device] $nocol"
+      echo -e "$yellow was that correct? $nocol"
+      select yn2 in "Yes" "No"; do
+      case $yn2 in
+         Yes)
+             echo -e "$green Cloning your Vendor Tree... $nocol"
+             git clone --quiet $vt_link -b $vt_branch vendor/$device > /dev/null
+             build_tenx
+             break
+             ;;
+          No)
+             echo -e "$red Okay Fine $nocol"
+             clone_vt
+             build_tenx
+             break
+             ;;
+         esac
+       done
       ;;
       2)
-      git clone --quiet $vt_link -b $vt_branch vendor/$device/$codename > /dev/null
+      echo -e "Entered Vendor Tree link was [git clone $vt_link -b $vt_branch vendor/$device/$codename] $nocol"
+      echo -e "$yellow was that correct? $nocol"
+      select yn3 in "Yes" "No"; do
+      case $yn3 in
+         Yes)
+             echo -e "$green Cloning your Vendor Tree... $nocol"
+             git clone --quiet $vt_link -b $vt_branch vendor/$device/$codename > /dev/null
+             build_tenx
+             break
+             ;;
+          No)
+             echo -e "$red Okay Fine $nocol"
+             clone_vt
+             build_tenx
+             break
+             ;;
+         esac
+       done
       ;;
       *)
       echo -e "$red Invalid option, Exiting!$nocol"
@@ -332,17 +494,19 @@ function build_tenx() {
      echo -e "$blue**************************************************"
      echo -e "                    Building TenX-OS                   "
      echo -e "*************************************************$nocol"
-     . build/envsetup.sh && echo $?
+     . build/envsetup.sh
      lunch aosp_$codename-userdebug
      build_type
      source ~/.bashrc
      export USE_CCACHE=1
      ccache -M 30G
-     brunch $codename && echo $?
+     brunch $codename
+
      local ret=$?
      if [[ $ret -eq 0 ]]; then
          upload
      else
+        echo -e "$red I've found some errors, stopping the Script, Fix them & Re-run me !! $nocol"
         exit
      fi
 }
@@ -373,7 +537,6 @@ function upload() {
     echo -e "$green Please choose where to upload your build: $nocol"
     echo -e "$yellow 1. Gdrive $nocol"
     echo -e "$red 2. Mega $nocol"
-    echo -e "$green 3. Sourceforge $nocol"
     echo -e "$cyan Enter your choice: $nocol"
     read upload_to
     echo -e "$blue Your choice was $upload $nocol"
@@ -411,32 +574,10 @@ function upload() {
       rmega-up TenX-OS*.zip -u $email
       exit
       ;;
-      3)
-      echo -e "$green Checking whether the build is Official or not $nocol"
-      if [[ $build_type -eq 2 ]]; then
-          echo -e "$green Official build found. $nocol"
-      else
-          echo -e "$red Your build is not Official, Exiting! $nocol"
-          exit
-      fi
-      echo -e "$blue**************************************************"
-      echo -e "                    Uploading to Sourceforge           "
-      echo -e "*************************************************$nocol"
-      cd out/target/product/$codename
-      echo -e "$yellow Enter your sourceforge username : $nocol"
-      read user_name
-      sftp $user_name@frs.sourceforge.net
-      cd /home/frs/projects/tenxos/$codename
-      put TenX-OS*.zip
-      exit
-      ;;
-      *)
-      echo -e "$red Invalid option, Exiting! $nocol"
-      exit
-      ;;
     esac
 }
 
+your_choice
 dir_name
 device_name
 device_codename
