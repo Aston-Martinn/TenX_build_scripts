@@ -18,6 +18,37 @@ echo -e "$red ╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═
 
 # Simple bash script to compile TenX-OS
 
+echo "Enter the BOT API Key"
+read -s -r key
+
+TG_BOT_API_KEY=$key
+TG_CHAT_ID=-1001460035339
+
+[[ -z "${TG_BOT_API_KEY}" ]] && echo "BOT_API_KEY not defined, exiting!" && exit 1
+function sendTG() {
+        curl -s "https://api.telegram.org/bot${TG_BOT_API_KEY}/sendmessage" --data "text=${*}&chat_id=${TG_CHAT_ID}&parse_mode=Markdown" >/dev/null
+}
+
+[[ -z "${TG_BOT_API_KEY}" ]] && echo "BOT_API_KEY not defined, exiting!" && exit 1
+function sendTGLogs() {
+        curl -s "https://api.telegram.org/bot${TG_BOT_API_KEY}/sendmessage" --data "text=${*}&chat_id=${TG_CHAT_ID}&parse_mode=Markdown" >/dev/null
+}
+
+# Full device name
+echo -e "Enter your Full Device name: "
+read full_dev_name
+
+# Code name
+echo -e "Enter your Device Codename: "
+read c_name
+
+sendTG "Executing my Build Script
+
+▪️Device: \`$full_dev_name\`
+▪️Codename: \`$c_name\`
+▪️Host: \`Advaith Bhat\`
+▪️Host-Machine: \`Kuntao-server\`"
+
 # Your choice
 function your_choice() {
     echo -e "$green How would you like to start with? $nocol"
